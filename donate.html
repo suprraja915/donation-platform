@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Donate - Online Donation Platform</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&amp;display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      font-family: 'Montserrat', sans-serif;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 460px;
+      padding: 40px 30px 50px;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      text-align: center;
+      user-select: none;
+      position: relative;
+    }
+
+    h1 {
+      margin-bottom: 24px;
+      font-weight: 700;
+      font-size: 2.2rem;
+      letter-spacing: 1px;
+      color: #ffdd59;
+    }
+
+    #campaignName {
+      font-size: 1.2rem;
+      margin-bottom: 30px;
+      color: #ffeaa7;
+      font-weight: 600;
+      user-select: text;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    input[type="number"],
+    input[type="text"],
+    input[type="tel"],
+    input[type="email"],
+    select {
+      padding: 14px 18px;
+      font-size: 1rem;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      transition: background-color 0.3s ease;
+      font-weight: 600;
+    }
+
+    input::placeholder {
+      color: #d6d6d6;
+      font-weight: 500;
+    }
+
+    input:focus,
+    select:focus {
+      background: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 0 10px #ffdd59;
+    }
+
+    button {
+      padding: 14px 18px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #2c3e50;
+      background-color: #ffdd59;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.15s ease;
+      user-select: none;
+    }
+    button:hover {
+      background-color: #f3ca2f;
+      transform: scale(1.05);
+    }
+    button:active {
+      transform: scale(0.95);
+    }
+
+    /* Payment Gateway overlay */
+
+    #paymentGateway {
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: rgba(15, 32, 39, 0.95);
+      border-radius: 16px;
+      width: 100%;
+      height: 100%;
+      padding: 30px 25px 40px;
+      box-sizing: border-box;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: none;
+      flex-direction: column;
+      user-select: none;
+      overflow-y: auto;
+      z-index: 10;
+    }
+
+    #paymentGateway.active {
+      display: flex;
+    }
+
+    #paymentGateway h2 {
+      color: #ffdd59;
+      margin-bottom: 20px;
+      font-weight: 700;
+      font-size: 1.8rem;
+      text-align: center;
+      user-select: none;
+    }
+
+    .pay-methods {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 25px;
+      user-select: none;
+    }
+
+    .pay-method {
+      padding: 12px 20px;
+      background: rgba(255, 221, 89, 0.3);
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      flex: 1;
+      text-align: center;
+      color: #2c3e50;
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+    .pay-method.selected {
+      background: #ffdd59;
+      box-shadow: 0 0 15px #ffdd59;
+    }
+
+    .payment-form {
+      display: none;
+      flex-direction: column;
+      gap: 18px;
+      user-select: none;
+    }
+
+    .payment-form.active {
+      display: flex;
+    }
+
+    label {
+      text-align: left;
+      color: #ffeaa7;
+      font-weight: 600;
+      user-select: text;
+    }
+
+    /* Receipt modal */
+
+    #receiptModal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.7);
+      background: rgba(255, 255, 255, 0.97);
+      padding: 30px 30px 40px;
+      border-radius: 16px;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+      text-align: left;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #333;
+      user-select: none;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      z-index: 9999;
+      max-width: 420px;
+      width: 90vw;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    #receiptModal.show {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    #receiptModal h2 {
+      text-align: center;
+      font-size: 1.8rem;
+      margin-bottom: 12px;
+      color: #ffdd59;
+    }
+    #receiptModal p {
+      margin: 6px 0;
+      font-size: 1rem;
+      color: #333;
+    }
+    #receiptModal .close-btn {
+      display: block;
+      width: 100%;
+      margin-top: 25px;
+      background-color: #ffdd59;
+      border: none;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #2c3e50;
+      padding: 12px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+    #receiptModal .close-btn:hover {
+      background-color: #f3ca2f;
+    }
+    #receiptModal .txn-label {
+      font-weight: 700;
+      display: inline-block;
+      width: 120px;
+    }
+
+    /* Responsive */
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 30px 25px 40px;
+        width: 90vw;
+      }
+      h1 {
+        font-size: 1.75rem;
+      }
+      button {
+        font-size: 1rem;
+        padding: 12px;
+      }
+      .pay-methods {
+        flex-direction: column;
+      }
+      .pay-method {
+        flex: unset;
+      }
+      #receiptModal {
+        font-size: 0.9rem;
+      }
+      #receiptModal h2 {
+        font-size: 1.4rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" role="main" aria-live="polite">
+    <h1>Donate Now</h1>
+    <div id="campaignName"></div>
+    <form id="donationForm" aria-label="Donation form">
+      <input
+        type="number"
+        id="amount"
+        placeholder="Enter amount (USD)"
+        min="1"
+        step="any"
+        required
+        aria-required="true"
+        aria-label="Donation amount"
+      />
+      <input
+        type="text"
+        id="cause"
+        placeholder="Cause"
+        required
+        aria-required="true"
+        aria-label="Donation cause"
+      />
+      <button type="submit" aria-label="Proceed to payment">Donate Now</button>
+    </form>
+
+    <section id="paymentGateway" aria-label="Payment gateway section" aria-hidden="true">
+      <h2>Select Payment Method</h2>
+      <nav class="pay-methods" role="tablist" aria-label="Payment methods">
+        <button class="pay-method selected" role="tab" aria-selected="true" aria-controls="cardPayment" id="tab-card">Card</button>
+        <button class="pay-method" role="tab" aria-selected="false" aria-controls="upiPayment" id="tab-upi">UPI</button>
+        <button class="pay-method" role="tab" aria-selected="false" aria-controls="netBankingPayment" id="tab-netbanking">Net Banking</button>
+      </nav>
+
+      <form id="paymentForm" aria-label="Payment method details">
+        <div class="payment-form active" id="cardPayment" role="tabpanel" aria-labelledby="tab-card">
+          <label for="cardName">Name on Card</label>
+          <input type="text" id="cardName" placeholder="John Doe" autocomplete="name" required aria-required="true" />
+          <label for="cardNumber">Card Number</label>
+          <input
+            type="tel"
+            id="cardNumber"
+            inputmode="numeric"
+            pattern="[0-9\s]{13,19}"
+            placeholder="1234 5678 9012 3456"
+            maxlength="19"
+            autocomplete="cc-number"
+            required
+            aria-required="true"
+          />
+          <label for="cardExpiry">Expiry (MM/YY)</label>
+          <input
+            type="text"
+            id="cardExpiry"
+            placeholder="MM/YY"
+            pattern="(0[1-9]|1[0-2])\/?([0-9]{2})"
+            maxlength="5"
+            autocomplete="cc-exp"
+            required
+            aria-required="true"
+          />
+          <label for="cardCVV">CVV</label>
+          <input
+            type="password"
+            id="cardCVV"
+            placeholder="123"
+            pattern="\\d{3,4}"
+            maxlength="4"
+            autocomplete="cc-csc"
+            required
+            aria-required="true"
+          />
+        </div>
+
+        <div class="payment-form" id="upiPayment" role="tabpanel" aria-labelledby="tab-upi">
+          <label for="upiId">UPI ID</label>
+          <input type="text" id="upiId" placeholder="example@upi" autocomplete="off" required aria-required="true" />
+        </div>
+
+        <div class="payment-form" id="netBankingPayment" role="tabpanel" aria-labelledby="tab-netbanking">
+          <label for="bankSelect">Select Your Bank</label>
+          <select id="bankSelect" required aria-required="true">
+            <option value="" disabled selected>Select a bank</option>
+            <option value="HDFC Bank">HDFC Bank</option>
+            <option value="ICICI Bank">ICICI Bank</option>
+            <option value="State Bank of India">State Bank of India</option>
+            <option value="Axis Bank">Axis Bank</option>
+            <option value="Kotak Mahindra Bank">Kotak Mahindra Bank</option>
+            <option value="Punjab National Bank">Punjab National Bank</option>
+          </select>
+        </div>
+
+        <button type="submit" aria-label="Pay now">Pay Now</button>
+      </form>
+    </section>
+  </div>
+
+  <aside id="receiptModal" role="dialog" aria-live="assertive" aria-modal="true" aria-hidden="true" tabindex="-1">
+    <h2>Donation Receipt</h2>
+    <p><span class="txn-label">Campaign:</span> <span id="r-campaign"></span></p>
+    <p><span class="txn-label">Cause:</span> <span id="r-cause"></span></p>
+    <p><span class="txn-label">Amount:</span> $<span id="r-amount"></span></p>
+    <p><span class="txn-label">Payment Method:</span> <span id="r-method"></span></p>
+    <p><span class="txn-label">Transaction ID:</span> <span id="r-txn"></span></p>
+    <p><span class="txn-label">Date:</span> <span id="r-date"></span></p>
+    <button class="close-btn" id="closeReceiptBtn" aria-label="Close receipt and return to main page">Close</button>
+  </aside>
+
+  <script>
+    // Utility for query params
+    function getQueryParams() {
+      const params = {};
+      window.location.search
+        .substring(1)
+        .split('&')
+        .forEach((param) => {
+          const [key, value] = param.split('=');
+          if (key) params[decodeURIComponent(key)] = decodeURIComponent(value || '');
+        });
+      return params;
+    }
+
+    function generateTxnId() {
+      return 'TXN' + Math.random().toString(36).substr(2, 9).toUpperCase();
+    }
+
+    const params = getQueryParams();
+
+    // Elements
+    const campaignNameDiv = document.getElementById('campaignName');
+    const causeInput = document.getElementById('cause');
+    const donationForm = document.getElementById('donationForm');
+    const paymentGateway = document.getElementById('paymentGateway');
+    const payMethods = document.querySelectorAll('.pay-method');
+    const paymentForms = document.querySelectorAll('.payment-form');
+    const paymentForm = document.getElementById('paymentForm');
+    const receiptModal = document.getElementById('receiptModal');
+    const rCampaign = document.getElementById('r-campaign');
+    const rCause = document.getElementById('r-cause');
+    const rAmount = document.getElementById('r-amount');
+    const rMethod = document.getElementById('r-method');
+    const rTxn = document.getElementById('r-txn');
+    const rDate = document.getElementById('r-date');
+    const closeReceiptBtn = document.getElementById('closeReceiptBtn');
+
+    if (params.name) {
+      campaignNameDiv.textContent = `Campaign: ${params.name}`;
+      causeInput.value = params.name;
+    } else {
+      campaignNameDiv.textContent = 'Campaign: (Unknown)';
+      causeInput.value = '';
+    }
+
+    // Show payment gateway on donation form submit
+    donationForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const amount = parseFloat(document.getElementById('amount').value);
+      const cause = causeInput.value.trim();
+
+      if (isNaN(amount) || amount < 1) {
+        alert('Please enter a valid donation amount of at least $1.');
+        return;
+      }
+
+      if (!cause) {
+        alert('Please enter a cause.');
+        return;
+      }
+
+      // Show payment section
+      paymentGateway.classList.add('active');
+      paymentGateway.setAttribute('aria-hidden', 'false');
+      donationForm.querySelector('button').disabled = true;
+      // Scroll to top of container for user focus on payment
+      paymentGateway.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // Payment method tabs switching
+    payMethods.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        payMethods.forEach((b) => {
+          b.classList.remove('selected');
+          b.setAttribute('aria-selected', 'false');
+        });
+        btn.classList.add('selected');
+        btn.setAttribute('aria-selected', 'true');
+
+        const targetId = btn.getAttribute('aria-controls');
+        paymentForms.forEach((form) => {
+          form.classList.remove('active');
+          form.setAttribute('hidden', 'true');
+        });
+        document.getElementById(targetId).classList.add('active');
+        document.getElementById(targetId).removeAttribute('hidden');
+      });
+    });
+
+    // Validate card expiry MM/YY format and future date
+    function validateCardExpiry(value) {
+      if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(value)) return false;
+      const [month, year] = value.split('/');
+      const now = new Date();
+      const currentYear = now.getFullYear() % 100; // two-digit year
+      const currentMonth = now.getMonth() + 1;
+      const expYear = parseInt(year, 10);
+      const expMonth = parseInt(month, 10);
+      if (expYear < currentYear) return false;
+      if (expYear === currentYear && expMonth < currentMonth) return false;
+      return true;
+    }
+
+    function displayReceipt(amount, cause, method) {
+      rCampaign.textContent = params.name || '(Unknown)';
+      rCause.textContent = cause;
+      rAmount.textContent = amount.toFixed(2);
+      rMethod.textContent = method;
+      rTxn.textContent = generateTxnId();
+      rDate.textContent = new Date().toLocaleString();
+
+      receiptModal.classList.add('show');
+      receiptModal.setAttribute('aria-hidden', 'false');
+      receiptModal.focus();
+    }
+
+    paymentForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const selectedMethodBtn = document.querySelector('.pay-method.selected');
+      if (!selectedMethodBtn) {
+        alert('Please select a payment method.');
+        return;
+      }
+      const selectedMethod = selectedMethodBtn.id;
+
+      const amount = parseFloat(document.getElementById('amount').value);
+      const cause = causeInput.value.trim();
+
+      if (selectedMethod === 'tab-card') {
+        // Validate card inputs
+        const cardName = document.getElementById('cardName').value.trim();
+        const cardNumber = document.getElementById('cardNumber').value.replace(/\s+/g, '');
+        const cardExpiry = document.getElementById('cardExpiry').value.trim();
+        const cardCVV = document.getElementById('cardCVV').value.trim();
+
+        if (!cardName) {
+          alert('Please enter the name on the card.');
+          return;
+        }
+        if (!/^\d{13,19}$/.test(cardNumber)) {
+          alert('Please enter a valid card number with 13 to 19 digits.');
+          return;
+        }
+        if (!validateCardExpiry(cardExpiry)) {
+          alert('Please enter a valid card expiry date in MM/YY format, not expired.');
+          return;
+        }
+        if (!/^\d{3,4}$/.test(cardCVV)) {
+          alert('Please enter a valid 3 or 4 digit CVV.');
+          return;
+        }
+
+        displayReceipt(amount, cause, 'Card');
+      } else if (selectedMethod === 'tab-upi') {
+        // Validate UPI ID
+        const upiId = document.getElementById('upiId').value.trim();
+        if (!upiId) {
+          alert('Please enter your UPI ID.');
+          return;
+        }
+        if (!/^[\\w.-]+@[\\w.-]+$/.test(upiId)) {
+          alert('Please enter a valid UPI ID.');
+          return;
+        }
+
+        displayReceipt(amount, cause, `UPI (${upiId})`);
+      } else if (selectedMethod === 'tab-netbanking') {
+        // Validate bank selection
+        const bankSelect = document.getElementById('bankSelect').value;
+        if (!bankSelect) {
+          alert('Please select your bank.');
+          return;
+        }
+
+        displayReceipt(amount, cause, `Net Banking (${bankSelect})`);
+      }
+    });
+
+    closeReceiptBtn.addEventListener('click', () => {
+      receiptModal.classList.remove('show');
+      receiptModal.setAttribute('aria-hidden', 'true');
+      // After closing receipt redirect to main
+      window.location.href = 'main.html';
+    });
+  </script>
+</body>
+</html>
+

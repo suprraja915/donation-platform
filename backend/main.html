@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Active Campaigns - Online Donation Platform</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      font-family: 'Montserrat', sans-serif;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      padding: 40px 20px;
+      overflow-x: hidden;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 30px 30px 40px;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      user-select: none;
+    }
+
+    #welcomeMsg {
+      font-weight: 700;
+      font-size: 1.7rem;
+      text-align: center;
+      margin-bottom: 20px;
+      color: #fff176; /* bright warm yellow */
+      user-select: text;
+    }
+
+    h1 {
+      margin-top: 0;
+      text-align: center;
+      font-weight: 700;
+      font-size: 2.4rem;
+      color: #ffdd59;
+      margin-bottom: 20px;
+      user-select: none;
+    }
+
+    #campaigns {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .campaign-card {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 20px;
+      border-radius: 14px;
+      box-shadow: 0 6px 20px 0 rgba(255, 255, 255, 0.12);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .campaign-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 30px 0 rgba(255, 221, 89, 0.5);
+    }
+
+    .campaign-title {
+      font-weight: 700;
+      font-size: 1.3rem;
+      margin-bottom: 12px;
+      user-select: text;
+      color: #ffeaa7;
+    }
+
+    .campaign-info {
+      font-size: 0.95rem;
+      margin-bottom: 18px;
+      color: #ddd;
+      user-select: text;
+    }
+
+    .stats {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      color: #bee3f8;
+      font-weight: 600;
+      font-size: 0.9rem;
+      user-select: text;
+    }
+
+    .stats span {
+      background: rgba(0, 0, 0, 0.25);
+      padding: 6px 12px;
+      border-radius: 12px;
+    }
+
+    button.donate-btn {
+      padding: 12px;
+      background-color: #ffdd59;
+      border: none;
+      border-radius: 12px;
+      color: #2c3e50;
+      font-weight: 700;
+      font-size: 1.05rem;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s ease, transform 0.15s ease;
+      align-self: center;
+      width: 100%;
+    }
+
+    button.donate-btn:hover {
+      background-color: #f3ca2f;
+      transform: scale(1.05);
+    }
+    button.donate-btn:active {
+      transform: scale(0.95);
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 20px 15px 30px;
+      }
+      #welcomeMsg {
+        font-size: 1.3rem;
+      }
+      h1 {
+        font-size: 1.8rem;
+      }
+      button.donate-btn {
+        font-size: 1rem;
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container" role="main">
+    <div id="welcomeMsg" aria-live="polite"></div>
+    <h1>Active Campaigns</h1>
+    <div id="campaigns" aria-label="List of active donation campaigns"></div>
+  </main>
+
+  <script>
+    // Fetch username from localStorage, show welcome message
+    const username = localStorage.getItem('donationUsername');
+    const welcomeElem = document.getElementById('welcomeMsg');
+    if (username && username.trim().length > 0) {
+      welcomeElem.textContent = `Welcome, ${username}!`;
+    } else {
+      welcomeElem.textContent = `Welcome!`;
+    }
+
+    // Campaign data sample
+    const campaigns = [
+      {
+        id: 1,
+        name: "Help the Homeless",
+        description:
+          "Provide essential supplies and shelter to homeless people in your city.",
+        donorsCount: 1245,
+        totalAmount: 32540,
+      },
+      {
+        id: 2,
+        name: "Save the Rainforest",
+        description:
+          "Support reforestation efforts to protect endangered wildlife and climate.",
+        donorsCount: 820,
+        totalAmount: 19500,
+      },
+      {
+        id: 3,
+        name: "Education for All",
+        description:
+          "Fund education supplies and scholarships for underprivileged children.",
+        donorsCount: 1050,
+        totalAmount: 27800,
+      },
+      {
+        id: 4,
+        name: "Medical Aid Fund",
+        description:
+          "Assist families with medical bills and essential healthcare services.",
+        donorsCount: 973,
+        totalAmount: 23000,
+      },
+    ];
+
+    const campaignsContainer = document.getElementById('campaigns');
+
+    function formatNumber(num) {
+      return num.toLocaleString();
+    }
+
+    function renderCampaigns() {
+      campaigns.forEach((campaign) => {
+        const card = document.createElement('article');
+        card.className = 'campaign-card';
+        card.setAttribute('tabindex', '0');
+
+        card.innerHTML = `
+          <h2 class="campaign-title">${campaign.name}</h2>
+          <p class="campaign-info" title="${campaign.description}">${campaign.description}</p>
+          <div class="stats" aria-label="Donation statistics for ${campaign.name}">
+            <span><strong>${formatNumber(campaign.donorsCount)}</strong> donors</span>
+            <span><strong>$${formatNumber(campaign.totalAmount)}</strong> donated</span>
+          </div>
+          <button class="donate-btn" aria-label="Donate now to ${campaign.name}" data-id="${campaign.id}">Donate Now</button>
+        `;
+
+        campaignsContainer.appendChild(card);
+      });
+    }
+
+    renderCampaigns();
+
+    // Delegate click event to campaigns container
+    campaignsContainer.addEventListener('click', (e) => {
+      if (e.target.classList.contains('donate-btn')) {
+        const campaignId = e.target.getAttribute('data-id');
+        // Redirect to donate page with campaign id and name as query params
+        const campaign = campaigns.find(c => c.id == campaignId);
+        if (campaign) {
+          const params = new URLSearchParams({
+            id: campaign.id,
+            name: campaign.name
+          });
+          window.location.href = `donate.html?${params.toString()}`;
+        }
+      }
+    });
+  </script>
+</body>
+</html>
